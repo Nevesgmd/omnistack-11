@@ -45,11 +45,3 @@ yarn
 yarn run start
 ```
 Metro Bundler will open with your run options.
-# Screenshots
-## Web
-<img align="center" width="700" src="./.github/web_01.png"></img>
-
-<img align="center" width="700" src="./.github/web_02.png"></img>
-## Mobile
-<img align="center" width="400" src="./.github/mobile_01.jpg"></img>
-<img align="center" width="400" src="./.github/mobile_02.jpg"></img>
