@@ -1,37 +1,32 @@
-// Todas as rotas GET, POST, PUT, DELETE ficam aqui.
+import express from 'express';
 
-const express = require("express");
-const OngController = require("./controllers/OngController");
-const IncidentController = require("./controllers/IncidentController");
-const ProfileController = require("./controllers/ProfileController");
-const SessionController = require("./controllers/SessionController");
+import SessionController from './controllers/SessionController';
+import OngController from './controllers/OngController';
+import IncidentController from './controllers/IncidentController';
+import ProfileController from './controllers/ProfileController';
+
+import ongMiddleware from './middlewares/ongHandler';
 
 const routes = express.Router();
 
+function catchAsyncErrors(fn) {
+  return (req, res, next) => {
+    const routePromise = fn(req, res, next);
+    if (routePromise.catch) {
+      routePromise.catch((err) => next(err));
+    }
+  };
+}
 
-//Fazendo Login
-routes.post("/sessions", SessionController.create);
+routes.post('/sessions', catchAsyncErrors(SessionController.store));
+routes.get('/ongs', catchAsyncErrors(OngController.index));
+routes.post('/ongs', catchAsyncErrors(OngController.store));
+routes.get('/incidents', catchAsyncErrors(IncidentController.index));
 
-//Lista todas as Ongs cadastradas.
-routes.get("/ongs", OngController.index);
+routes.use(ongMiddleware);
 
-//Cadastra uma nova Ong
-routes.post("/ongs", OngController.create);
+routes.post('/incidents', catchAsyncErrors(IncidentController.store));
+routes.delete('/incidents/:id', catchAsyncErrors(IncidentController.destroy));
+routes.get('/profiles', catchAsyncErrors(ProfileController.index));
 
-//Lista todos os Casos de uma especifica ONG
-routes.get("/profile", ProfileController.index);
-
-
-
-//Lista todos os casos de todas as ONGs
-routes.get("/incidents", IncidentController.index);
-
-//Cria um novo Caso de uma ONG
-routes.post("/incidents", IncidentController.create);
-
-//Deleta um Caso de uma ONG
-routes.delete("/incidents/:id", IncidentController.delete);
-
-
-
-module.exports = routes;
+export default routes;

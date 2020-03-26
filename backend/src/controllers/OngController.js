@@ -1,34 +1,56 @@
-//Todas as funcionalidades das rotas de Ong
+import * as Yup from 'yup';
+import crypto from 'crypto';
+import connection from '../database/connection';
 
-const crypto = require("crypto");
-const connection = require("../database/connection");
+export default {
+  async index(req, res) {
+    const ongs = await connection('ongs').select('*');
 
-module.exports = {
-
-  //Lista todas as ONGs que já foram criadas
-  async index(request, response) {
-    const ongs = await connection("ongs").select("*");
-
-    return response.json(ongs);
+    return res.json(ongs);
   },
 
-
-  //Cria uma nova ONG dentro do Banco de Dados
-  async create(request, response) {
-    const { name, email, whatsapp, city, uf } = request.body;
-
-    const id = crypto.randomBytes(4).toString("HEX");
-
-    await connection("ongs").insert({
-      id,
-      name,
-      email,
-      whatsapp,
-      city,
-      uf,
+  async store(req, res) {
+    const schema = Yup.object().shape({
+      name: Yup.string()
+        .trim()
+        .required()
+        .max(200),
+      email: Yup.string()
+        .trim()
+        .required()
+        .max(200)
+        .email(),
+      whatsapp: Yup.string()
+        .trim()
+        .required()
+        .max(200),
+      city: Yup.string()
+        .trim()
+        .required()
+        .max(200),
+      uf: Yup.string()
+        .trim()
+        .required()
+        .max(2),
     });
 
-    response.json({ id });
-  }
-};
+    await schema.validate(req.body);
 
+    const {
+      name, email, whatsapp, city, uf,
+    } = req.body;
+
+    const id = crypto.randomBytes(4).toString('HEX');
+
+    await connection('ongs').insert({
+      id, name, email, whatsapp, city, uf,
+    });
+
+    const ong = await connection('ongs')
+      .where('id', id)
+      .select('*')
+      .first();
+
+    return res.json(ong);
+  },
+};

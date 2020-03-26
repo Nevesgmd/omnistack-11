@@ -1,65 +1,77 @@
-//Todas as funcionalidades das rotas de Incidents (Casos de Ongs);
+import * as Yup from 'yup';
+import connection from '../database/connection';
 
-const connection = require("../database/connection");
+export default {
+  async index(req, res) {
+    const { page = 1 } = req.query;
 
-module.exports = {
+    const [count] = await connection('incidents').count();
 
-  //Lista todos os casos de todas as ONGs por página limite de 5.
-  async index(request, response) {
-
-    const { page = 1 } = request.query;
-
-    const [count] = await connection("incidents").count();
-
-    const incidents = await connection("incidents")
-      .join("ongs", "ongs.id", "=", "incidents.ong_id")
+    const incidents = await connection('incidents')
+      .join('ongs', 'ongs.id', '=', 'incidents.ong_id')
       .limit(5)
       .offset((page - 1) * 5)
       .select([
-        "incidents.*",
-        "ongs.name",
-        "ongs.email",
-        "ongs.whatsapp",
-        "ongs.city",
-        "ongs.uf"
+        'incidents.*',
+        'ongs.name',
+        'ongs.email',
+        'ongs.whatsapp',
+        'ongs.city',
+        'ongs.uf',
       ]);
 
-    response.header("X-Total-Count", count["count(*)"]);
+    res.header('X-Total-Count', count['count(*)']);
 
-    return response.json(incidents);
+    return res.json(incidents);
   },
 
-  //Cria um novo Caso de uma ONG
-  async create(request, response) {
-    const { title, description, value } = request.body;
-    const ong_id = request.headers.authorization;
-
-    const [id] = await connection("incidents").insert({
-      title,
-      description,
-      value,
-      ong_id,
+  async store(req, res) {
+    const schema = Yup.object().shape({
+      title: Yup.string()
+        .trim()
+        .required()
+        .max(200),
+      description: Yup.string()
+        .trim()
+        .required()
+        .max(200),
+      value: Yup
+        .number()
+        .required(),
     });
-    console.log(id);
-    return response.json({ id });
-  },
 
-  //Deleta um Caso de uma ONG
-  async delete(request, response) {
-    const { id } = request.params;
-    const ong_id = request.headers.authorization;
+    await schema.validate(req.body);
 
-    const incident = await connection("incidents")
-      .where("id", id)
-      .select("ong_id")
+    const {
+      title, description, value,
+    } = req.body;
+
+    const [id] = await connection('incidents').insert({
+      title, description, value, ong_id: req.ong.id,
+    });
+
+    const incident = await connection('incidents')
+      .where('id', id)
+      .select('*')
       .first();
 
-    if (incident.ong_id != ong_id) {
-      return response.status(401).json({ erro: "Operation not permitted." });
+    return res.json(incident);
+  },
+
+  async destroy(request, response) {
+    const { id } = request.params;
+
+    const incident = await connection('incidents')
+      .where('id', id)
+      .select('ong_id')
+      .first();
+
+    if (incident.ong_id !== request.ong.id) {
+      return response.status(401).json({ error: 'Operation not allowed.' });
     }
 
-    await connection("incidents").where("id", id).delete();
+    await connection('incidents').where('id', id).delete();
 
     return response.status(204).send();
-  }
+  },
 };

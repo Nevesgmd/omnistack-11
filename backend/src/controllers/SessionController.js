@@ -1,21 +1,28 @@
-//Funcionalidades de LOGIN das rotas de uma especica ONG.
+import * as Yup from 'yup';
+import connection from '../database/connection';
 
-const connection = require("../database/connection");
+export default {
+  async store(req, res) {
+    const schema = Yup.object().shape({
+      id: Yup.string()
+        .trim()
+        .required()
+        .max(200),
+    });
 
-//Verifica se uma ONG existe ao fazer o Login
-module.exports = {
-  async create(request, response) {
-    const { id } = request.body;
+    await schema.validate(req.body);
 
-    const ong = await connection("ongs")
-      .where("id", id)
-      .select("name")
+    const { id } = req.body;
+
+    const ong = await connection('ongs')
+      .where('id', id)
+      .select(['id', 'name'])
       .first();
 
     if (!ong) {
-      return response.status(400).json({ erro: "No ONG found with this ID." })
+      return res.status(400).json({ error: 'No ONG found with this ID.' });
     }
 
-    return response.json(ong);
-  }
-}
+    return res.json(ong);
+  },
+};
