@@ -1,38 +1,36 @@
-const express = require('express');
+// Todas as rotas GET, POST, PUT, DELETE ficam aqui.
+
+const express = require("express");
+const OngController = require("./controllers/OngController");
+const IncidentController = require("./controllers/IncidentController");
+const ProfileController = require("./controllers/ProfileController");
+const SessionController = require("./controllers/SessionController");
+
 const routes = express.Router();
 
-const OngController = require('./controllers/OngController');
-const IncidentController = require('./controllers/IncidentController');
-const ProfileController = require('./controllers/ProfileController');
-const SessionController = require('./controllers/SessionController');
+
+//Fazendo Login
+routes.post("/sessions", SessionController.create);
+
+//Lista todas as Ongs cadastradas.
+routes.get("/ongs", OngController.index);
+
+//Cadastra uma nova Ong
+routes.post("/ongs", OngController.create);
+
+//Lista todos os Casos de uma especifica ONG
+routes.get("/profile", ProfileController.index);
 
 
-/*
 
-GET --> Buscar uma informação no backend
-POST --> Criar uma informação no backend
-PUT --> Alterar uma informação no backend
-DELETE --> Deletar uma informação no backend
+//Lista todos os casos de todas as ONGs
+routes.get("/incidents", IncidentController.index);
 
-*/
+//Cria um novo Caso de uma ONG
+routes.post("/incidents", IncidentController.create);
 
-/*
-
-TIPOS DE PARÂMETROS:
-
-Query Params --> parâmetros nomeados enviados na rota após '?' (como fazer query)
-Route Params --> parâmetros utilizados para identificar recursos
-Request body --> corpo da requisição, utilizado para criar ou alterar recursos
-
-*/
-
-routes.get('/ongs', OngController.index);
-routes.post('/ongs', OngController.create);
-routes.get('/incidents', IncidentController.index);
-routes.post('/incidents', IncidentController.create);
-routes.delete('/incidents/:id', IncidentController.delete);
-routes.get('/profile', ProfileController.index);
-routes.post('/sessions', SessionController.create);
+//Deleta um Caso de uma ONG
+routes.delete("/incidents/:id", IncidentController.delete);
 
 
 

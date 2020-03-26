@@ -1,6 +1,8 @@
-const knex = require('knex');
-const configuration = require('../../knexfile');
+//Faz a conexão com o Banco de Dados Sqlite3
 
-const conection = knex(configuration.development);
+const knex = require("knex");
+const configuration = require("../../knexfile");
 
-module.exports = conection;
+const connection = knex(configuration.development);
+
+module.exports = connection;

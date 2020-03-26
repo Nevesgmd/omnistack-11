@@ -1,13 +1,19 @@
-const connection = require('../database/connection');
-const crypto = require('crypto');
+//Uma das funcionalidades das rotas de uma especica ONG.
 
+const connection = require("../database/connection");
 
+//Lista todos os Casos de uma especifica ONG
 module.exports = {
-    async index(request, response) {
-        const ong_id = request.headers.authorization;
+  async index(request, response) {
 
-        const incidents = await connection('incidents').where('ong_id', ong_id).select('*')
+    //Pegando o ID da ONG que está LOGADA
+    const ong_id = request.headers.authorization;
 
-        return response.json(incidents);
-    }
-};
+    //Buscando os Casos criados pela ONG com o ID (ong_id)
+    const incidents = await connection("incidents")
+      .where("ong_id", ong_id)
+      .select("*");
+
+    return response.json(incidents);
+  }
+}
