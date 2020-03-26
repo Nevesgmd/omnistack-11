@@ -1,5 +1,5 @@
 # Semana Omnistack 11 - Be The Hero
-An application to help nonprofit organizations to achieve their goals.
+An application produced on a  [Rocketseat](https://rocketseat.com.br/) workshop to help nonprofit organizations to achieve their goals.
 # Technologies Used
 - Node.js
 - React JS
